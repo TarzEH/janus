@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# Neither job needs more than read.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+
+      # The generated barrel must match the technique files, same as a lockfile.
+      - name: Catalog index drift
+        run: node scripts/gen-catalog-index.mjs --check
+
+      # tsup (esbuild) strips types without checking them. This is the type gate.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      # Build before test: the CLI smoke test execs the built binary on purpose,
+      # because a broken published artifact is exactly what it exists to catch.
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test
+
+
+      # One package that is both a library and a binary is exactly the shape
+      # these tools exist to catch, and it breaks AFTER publish.
+      - name: Package publish sanity
+        if: matrix.node == 22
+        run: |
+          npx --yes publint .
+          # Scope to the module entry: ./catalog.json is a published DATA file,
+          # and attw correctly reports that it does not resolve to types or JS.
+          npx --yes @arethetypeswrong/cli --pack . --entrypoints . --ignore-rules cjs-resolves-to-esm
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # The gitleaks ACTION derives a commit range from the event, which is
+      # `<sha>^..<sha>` — unresolvable on an initial push, where the first commit
+      # has no parent. Running the binary over full history avoids depending on
+      # the event shape at all, and scans more.
+      - name: Install gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+      - name: Scan full history
+        run: gitleaks detect --redact --no-banner --exit-code 1 --log-opts=--all

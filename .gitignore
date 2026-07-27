@@ -1,0 +1,14 @@
+node_modules/
+dist/
+binaries/
+.tsbuild/
+*.tsbuildinfo
+coverage/
+.DS_Store
+
+# Local demo/recording material. Deliberately not tracked.
+demo/
+
+# JANUS itself needs no secrets — this is belt-and-braces for local scratch files
+.env
+.env*.local

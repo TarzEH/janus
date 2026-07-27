@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="JANUS mark: two faces sharing one broken boundary">
+  <title>JANUS</title>
+  <desc>Two profiles facing outward from a single head, divided by a boundary drawn as a broken line — the instruction/data boundary an LLM cannot enforce.</desc>
+
+  <defs>
+    <linearGradient id="jn-attack" x1="0" y1="0.1" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#FF9A80"/>
+      <stop offset="1" stop-color="#DC4238"/>
+    </linearGradient>
+    <linearGradient id="jn-defend" x1="1" y1="0.1" x2="0.1" y2="1">
+      <stop offset="0" stop-color="#84F5DF"/>
+      <stop offset="1" stop-color="#199C87"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Container: hexagon, the shape security tooling wears. -->
+  <path d="M32 2 57.6 16.9v30.2L32 62 6.4 47.1V16.9Z" fill="#101219"/>
+  <path d="M32 2 57.6 16.9v30.2L32 62 6.4 47.1V16.9Z" fill="none" stroke="#39414F" stroke-width="1.5"/>
+
+  <!--
+    Left profile, facing out. Angular rather than organic on purpose: straight
+    segments keep the brow, nose and chin legible at 16px in a browser tab,
+    which is where a project mark actually spends its life. The nose is the one
+    dominant protrusion; everything below it is deliberately smaller so the
+    silhouette does not read as a saw blade.
+  -->
+  <g fill="url(#jn-attack)">
+    <path d="M30.8 11.5 24 12 18.4 15.6 15.6 21.8 17.4 26.6 12.4 32.6 17.8 35.4 15.9 38.9 18.6 41.4 16.6 45.4 21.4 49.6 24.4 54.5 30.8 54.5Z"/>
+  </g>
+  <!-- Eye, cut in the container colour so it reads as depth rather than decoration. -->
+  <path d="M21.6 24.6 18.6 26.2l3 1.4Z" fill="#101219"/>
+
+  <!-- Right profile, mirrored across x = 32. -->
+  <g fill="url(#jn-defend)">
+    <path d="M33.2 11.5 40 12l5.6 3.6 2.8 6.2-1.8 4.8 5 6-5.4 2.8 1.9 3.5-2.7 2.5 2 4-4.8 4.2-3 4.9h-6.4Z"/>
+  </g>
+  <path d="M42.4 24.6l3 1.6-3 1.4Z" fill="#101219"/>
+
+  <!--
+    The boundary itself, drawn broken. That is the entire thesis: the line
+    between instruction and data is a convention rendered as text, not a wall.
+  -->
+  <path d="M32 9.5v46" stroke="#101219" stroke-width="3.4"/>
+  <path d="M32 10.5v6.5M32 20.5v5.5M32 30v10M32 44v3.5M32 51.5v3" stroke="#F7D473" stroke-width="1.7" stroke-linecap="round"/>
+</svg>

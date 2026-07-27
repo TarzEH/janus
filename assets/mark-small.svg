@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="JANUS">
+  <title>JANUS</title>
+  <desc>Small-size variant. Face detail is dropped below ~32px and only the idea survives: two opposed sides and a boundary that breaks.</desc>
+
+  <!--
+    A separate drawing rather than a scaled master. Brow, nose and chin turn to
+    mush under ~32px, so this keeps only what still reads at 16: two opposed
+    halves, and a seam that is visibly not continuous.
+  -->
+  <path d="M16 1 28.9 8.5v15L16 31 3.1 23.5v-15Z" fill="#101219"/>
+  <path d="M16 1 28.9 8.5v15L16 31 3.1 23.5v-15Z" fill="none" stroke="#39414F" stroke-width="1.4"/>
+
+  <path d="M14.6 6 8 8.2 5.9 12.5l3.3 3.5-3.3 3.5L8 23.8 14.6 26Z" fill="#E9584A"/>
+  <path d="M17.4 6 24 8.2l2.1 4.3-3.3 3.5 3.3 3.5-2.1 4.3-6.6 2.2Z" fill="#2CC0A6"/>
+
+  <path d="M16 4.5v23" stroke="#101219" stroke-width="2.6"/>
+  <path d="M16 5v5M16 12.5v7M16 22v5.5" stroke="#F7D473" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

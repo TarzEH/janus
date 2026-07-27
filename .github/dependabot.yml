@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint 8.x declares `typescript: >=4.8.4 <6.1.0`, so TS 7 (the
+      # native port) is outside its supported peer range. Revisit when
+      # typescript-eslint ships TS 7 support; until then a bump here breaks lint.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+    groups:
+      dev-tooling:
+        patterns: ["eslint*", "typescript-eslint", "vitest", "tsup", "typescript"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

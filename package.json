@@ -1,0 +1,59 @@
+{
+  "name": "janus-cli",
+  "version": "0.3.0",
+  "description": "Wrap your instruction in documented prompt-injection techniques. Offline, deterministic, zero network.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "janus": "./dist/janus.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./catalog.json": "./dist/catalog.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/gen-catalog-index.mjs && tsup && node scripts/emit-catalog-json.mjs",
+    "build:binaries": "npm run build && node scripts/build-binaries.mjs",
+    "typecheck": "tsc -b --verbose",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "demo": "node scripts/demo.mjs",
+    "catalog:index": "node scripts/gen-catalog-index.mjs",
+    "catalog:next-id": "node scripts/next-id.mjs"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.8.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  },
+  "keywords": [
+    "prompt-injection",
+    "llm-security",
+    "red-team",
+    "pentest",
+    "ai-security",
+    "cli"
+  ]
+}
