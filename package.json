@@ -42,11 +42,11 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.1",
-    "eslint": "^10.8.0",
+    "eslint": "^10.9.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.0",
-    "typescript-eslint": "^8.65.0",
-    "vitest": "^4.1.10"
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.11"
   },
   "keywords": [
     "prompt-injection",
