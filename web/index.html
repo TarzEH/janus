@@ -521,7 +521,7 @@ coverageEl.innerHTML = owaspItems.map(o => {
     <div class="owasp-id">${o.id}</div>
     <div class="owasp-name">${o.name}</div>
     <div class="coverage-bar"><div class="coverage-fill" style="width:${pct}%;background:${color}"></div></div>
-    <div class="count">${matching.length} technique${matching.length !== 1 ? 's' : ''}: ${matching.map(t => t.id).join(', ') || 'none'}</div>
+    <div class="count">${matching.length} technique${matching.length !== 1 ? 's' : ''}: ${matching.map(t => t.id).join(', ') || '1.0.0'}</div>
   </div>`;
 }).join('');
 
@@ -610,7 +610,7 @@ function generate() {
     return;
   }
 
-  const seed = document.getElementById('seed').value || 'playground';
+  const seed = document.getElementById('seed').value || '1.0.0';
   const mutatorSelection = getSelectedMutators();
 
   let result;
