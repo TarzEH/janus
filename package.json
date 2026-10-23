@@ -31,6 +31,7 @@
     "typecheck": "tsc -b --verbose",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "demo": "node scripts/demo.mjs",
     "catalog:index": "node scripts/gen-catalog-index.mjs",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^4.1.12",
     "eslint": "^10.8.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.0",

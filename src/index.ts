@@ -18,4 +18,6 @@ export * from "./mutate/registry.js";
 export * from "./mutate/chain.js";
 export { decodeUnicodeTags } from "./mutate/mutators/encoding.js";
 export * from "./build.js";
+export * from "./report.js";
+export * from "./loader.js";
 export * from "./guard.js";

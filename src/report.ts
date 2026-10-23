@@ -1,0 +1,157 @@
+import type { BuildResult, Payload } from "./build.js";
+import { getTechnique } from "./catalog/catalog.js";
+import {
+  getMappings,
+  OWASP_LLM_TOP_10,
+  owaspCoverage,
+  type TechniqueMapping,
+} from "./catalog/mappings.js";
+import { CATEGORY_META } from "./schema/enums.js";
+import { JANUS_VERSION } from "./version.js";
+
+export interface ReportPayload {
+  readonly techniqueId: string;
+  readonly techniqueName: string;
+  readonly category: string;
+  readonly categoryCode: string;
+  readonly owasp: readonly string[];
+  readonly atlas: readonly string[];
+  readonly mutatorChain: readonly string[];
+  readonly warnings: readonly string[];
+  readonly text: string;
+}
+
+export interface ReportCoverage {
+  readonly owaspId: string;
+  readonly owaspName: string;
+  readonly techniques: readonly string[];
+  readonly covered: boolean;
+}
+
+export interface Report {
+  readonly meta: {
+    readonly tool: string;
+    readonly version: string;
+    readonly seed: string;
+    readonly instruction: string;
+    readonly timestamp: string;
+    readonly payloadCount: number;
+    readonly techniqueCount: number;
+    readonly skippedCount: number;
+  };
+  readonly payloads: readonly ReportPayload[];
+  readonly coverage: readonly ReportCoverage[];
+  readonly skipped: readonly { id: string; reason: string }[];
+}
+
+function toReportPayload(p: Payload): ReportPayload {
+  const t = getTechnique(p.techniqueId);
+  const m: TechniqueMapping = getMappings(p.techniqueId);
+  const cat = t ? CATEGORY_META[t.category] : undefined;
+  return {
+    techniqueId: p.techniqueId,
+    techniqueName: t?.name ?? "unknown",
+    category: cat?.label ?? "unknown",
+    categoryCode: cat?.code ?? "??",
+    owasp: m.owasp,
+    atlas: m.atlas,
+    mutatorChain: p.chain.map((c) => c.id),
+    warnings: [...p.warnings],
+    text: p.text,
+  };
+}
+
+export function generateReport(result: BuildResult, instruction: string, timestamp?: string): Report {
+  const cov = owaspCoverage();
+  return {
+    meta: {
+      tool: "janus",
+      version: JANUS_VERSION,
+      seed: result.seed,
+      instruction,
+      timestamp: timestamp ?? "",
+      payloadCount: result.payloads.length,
+      techniqueCount: new Set(result.payloads.map((p) => p.techniqueId)).size,
+      skippedCount: result.skipped.length,
+    },
+    payloads: result.payloads.map(toReportPayload),
+    coverage: OWASP_LLM_TOP_10.map((item) => ({
+      owaspId: item.id,
+      owaspName: item.name,
+      techniques: cov.get(item.id) ?? [],
+      covered: (cov.get(item.id)?.length ?? 0) > 0,
+    })),
+    skipped: [...result.skipped],
+  };
+}
+
+export function reportToMarkdown(r: Report): string {
+  const lines: string[] = [];
+  const h = (level: number, text: string) => lines.push(`${"#".repeat(level)} ${text}\n`);
+
+  h(1, "JANUS Assessment Report");
+  lines.push("");
+  lines.push(`| Field | Value |`);
+  lines.push(`|---|---|`);
+  lines.push(`| **Tool** | janus v${r.meta.version} |`);
+  lines.push(`| **Seed** | \`${r.meta.seed}\` |`);
+  lines.push(`| **Instruction** | ${r.meta.instruction.length > 80 ? r.meta.instruction.slice(0, 77) + "..." : r.meta.instruction} |`);
+  lines.push(`| **Timestamp** | ${r.meta.timestamp} |`);
+  lines.push(`| **Payloads** | ${r.meta.payloadCount} |`);
+  lines.push(`| **Techniques** | ${r.meta.techniqueCount} |`);
+  lines.push(`| **Skipped** | ${r.meta.skippedCount} |`);
+  lines.push("");
+
+  h(2, "OWASP LLM Top 10 Coverage");
+  lines.push("");
+  lines.push(`| Item | Name | Techniques | Status |`);
+  lines.push(`|---|---|---|---|`);
+  for (const c of r.coverage) {
+    const status = c.covered ? `${c.techniques.length} technique(s)` : "—";
+    const mark = c.covered ? "✓" : "—";
+    lines.push(`| **${c.owaspId}** | ${c.owaspName} | ${c.techniques.join(", ") || "—"} | ${mark} ${status} |`);
+  }
+  const coveredCount = r.coverage.filter((c) => c.covered).length;
+  lines.push("");
+  lines.push(`**Coverage: ${coveredCount}/${r.coverage.length}** OWASP items addressed.`);
+  lines.push("");
+
+  h(2, "Payloads");
+  lines.push("");
+  for (const [i, p] of r.payloads.entries()) {
+    h(3, `${i + 1}. ${p.techniqueId} — ${p.techniqueName}`);
+    lines.push("");
+    lines.push(`- **Category:** ${p.categoryCode} ${p.category}`);
+    lines.push(`- **OWASP:** ${p.owasp.join(", ") || "unmapped"}`);
+    lines.push(`- **ATLAS:** ${p.atlas.join(", ") || "unmapped"}`);
+    lines.push(`- **Mutators:** ${p.mutatorChain.join(" → ") || "none"}`);
+    if (p.warnings.length) {
+      lines.push(`- **Warnings:** ${p.warnings.join("; ")}`);
+    }
+    lines.push("");
+    lines.push("```");
+    lines.push(p.text);
+    lines.push("```");
+    lines.push("");
+  }
+
+  if (r.skipped.length) {
+    h(2, "Skipped Techniques");
+    lines.push("");
+    for (const s of r.skipped) {
+      lines.push(`- **${s.id}**: ${s.reason}`);
+    }
+    lines.push("");
+  }
+
+  lines.push("---");
+  lines.push(`*Generated by janus v${r.meta.version} — ${r.meta.timestamp}*`);
+  lines.push("");
+  return lines.join("\n");
+}
+
+export function reportToJson(r: Report): string {
+  return JSON.stringify(r, null, 2) + "\n";
+}
+
+export type ReportFormat = "json" | "md";

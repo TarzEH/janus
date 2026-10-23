@@ -5,6 +5,7 @@
 **Your text in. Injection payloads out.**
 
 [![CI](https://github.com/TarzEH/janus/actions/workflows/ci.yml/badge.svg)](https://github.com/TarzEH/janus/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/TarzEH/janus/graph/badge.svg)](https://codecov.io/gh/TarzEH/janus)
 [![npm](https://img.shields.io/npm/v/janus-cli?color=22d3ee)](https://www.npmjs.com/package/janus-cli)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](.nvmrc)
@@ -79,6 +80,8 @@ janus --input="--ignore all"     # when it starts with a dash
 | `-n, --count N` | Stop after N. |
 | `-s, --seed S` | Reproducibility. Generated and echoed to stderr if omitted. |
 | `-o, --output 'p-%n.txt'` | One file per payload. |
+| `-r, --report FORMAT` | Structured report: `json` or `md`. OWASP/ATLAS mapped. |
+| `--load FILE` | Load custom techniques from a JSON file. Repeatable. |
 | `-q` · `-l, --list` · `-h` · `-V` | |
 
 ### Output format
@@ -99,6 +102,8 @@ records, not 19 — the same defect as
 janus -i "..." | xargs -0 -n1 curl -sd            # NUL, the way find -print0 works
 janus -i "..." --jsonl | jq -r .                  # round-trips to exact bytes
 janus -i "..." -o 'payload-%n.txt'                # one file each
+janus -i "..." --report json -o report.json       # structured assessment report
+janus -i "..." --report md -o report.md           # markdown report for deliverables
 ```
 
 stdout is payloads. Everything else — the seed, warnings, skipped techniques — is
@@ -195,8 +200,9 @@ Three things follow from the research and are baked in:
 | **Deterministic output** | Seed-reproducible | No | No | No |
 | **Obfuscation chains** | 16 mutators, 1–5 per technique | Converters (no chain) | Buffs (union, not chain) | Plugins |
 | **OWASP LLM Top 10 mapped** | Yes (9/10) | Partial | Partial | Partial |
+| **Assessment reports** | JSON + Markdown | Custom | No | Custom |
 | **MITRE ATLAS mapped** | Yes | No | Yes | No |
-| **Techniques** | 30 | N/A (converters) | 34 probes | Plugins |
+| **Techniques** | 30 built-in + `--load` custom | N/A (converters) | 34 probes | Plugins |
 | **Browser playground** | Yes | No | No | No |
 | **Runs attacks** | Never | Yes | Yes | Yes |
 

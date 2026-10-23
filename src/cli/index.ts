@@ -9,9 +9,14 @@ import {
   MUTATOR_IDS,
   TECHNIQUES,
   getTechnique,
+  generateReport,
+  reportToJson,
+  reportToMarkdown,
+  parseTechniques,
   type Category,
   type MutatorId,
   type Payload,
+  type Technique,
 } from "../index.js";
 
 const HELP = `janus ${JANUS_VERSION} — wrap your instruction in documented prompt-injection techniques
@@ -33,6 +38,8 @@ OPTIONS
   -n, --count N         Stop after N payloads.
   -s, --seed S          Reproducibility. Generated and echoed to stderr if omitted.
   -o, --output PATTERN  Write to files instead of stdout; %n is the payload index.
+  -r, --report FORMAT   Export a structured report: json | md
+      --load FILE       Load extra techniques from a JSON file.
   -q, --quiet           Silence stderr. Never affects stdout.
   -l, --list            List techniques and mutators, then exit.
   -h, --help  -V, --version
@@ -42,6 +49,7 @@ OUTPUT FORMAT
   -J, --jsonl           One JSON string per line. Lossless and line-safe.
       --raw             Newline-separated. AMBIGUOUS: payloads contain newlines.
       --pretty          Human view.  [default when stdout is a terminal]
+  -r, --report FORMAT   Structured report: json | md. OWASP/ATLAS mapped.
 
   Payloads are multi-line by design, so a newline cannot delimit them. NUL can:
       janus -i "..." | xargs -0 -n1 curl -sd
@@ -78,6 +86,8 @@ interface Flags {
   count?: string;
   seed?: string;
   output?: string;
+  report?: string;
+  load?: string[];
   quiet?: boolean;
   list?: boolean;
   null?: boolean;
@@ -92,24 +102,27 @@ const CATEGORY_BY_CODE = new Map<string, Category>(
   Object.entries(CATEGORY_META).map(([slug, m]) => [m.code, slug as Category]),
 );
 
-function resolveSelector(sel: string): string[] {
+function resolveSelector(sel: string, extraTechniques?: readonly Technique[]): string[] {
   const s = sel.trim();
   if (!s) return [];
-  if (s.toLowerCase() === "all") return TECHNIQUES.map((t) => t.id);
+  const allTechniques = extraTechniques?.length ? [...TECHNIQUES, ...extraTechniques] : TECHNIQUES;
+  if (s.toLowerCase() === "all") return allTechniques.map((t) => t.id);
 
   const byId = getTechnique(s.toUpperCase());
   if (byId) return [byId.id];
+  const extra = extraTechniques?.find((t) => t.id === s.toUpperCase());
+  if (extra) return [extra.id];
 
   const category = CATEGORY_BY_CODE.get(s.toUpperCase()) ?? (s.toLowerCase() as Category);
   if (category in CATEGORY_META) {
-    return TECHNIQUES.filter((t) => t.category === category).map((t) => t.id);
+    return allTechniques.filter((t) => t.category === category).map((t) => t.id);
   }
 
   return die(`unknown selector "${sel}" — try a technique id, C1..C8, a category slug, or "all"`);
 }
 
-function expand(specs: readonly string[] | undefined): string[] {
-  return (specs ?? []).flatMap((spec) => spec.split(",").flatMap(resolveSelector));
+function expand(specs: readonly string[] | undefined, extraTechniques?: readonly Technique[]): string[] {
+  return (specs ?? []).flatMap((spec) => spec.split(",").flatMap((s) => resolveSelector(s, extraTechniques)));
 }
 
 function parseMutators(spec: string | undefined): "recommended" | "none" | MutatorId[] {
@@ -194,6 +207,8 @@ function main(): void {
         count: { type: "string", short: "n" },
         seed: { type: "string", short: "s" },
         output: { type: "string", short: "o" },
+        report: { type: "string", short: "r" },
+        load: { type: "string", multiple: true },
         quiet: { type: "boolean", short: "q" },
         list: { type: "boolean", short: "l" },
         null: { type: "boolean", short: "0" },
@@ -229,15 +244,38 @@ function main(): void {
     die(`-n takes a positive whole number, got "${flags.count}"`);
   }
 
-  const included = flags.technique?.length ? expand(flags.technique) : undefined;
-  const excluded = new Set(expand(flags.exclude));
+  let extraTechniques: Technique[] | undefined;
+  if (flags.load?.length) {
+    extraTechniques = [];
+    for (const path of flags.load) {
+      let raw: unknown;
+      try {
+        raw = JSON.parse(readFileSync(path, "utf8"));
+      } catch {
+        die(`cannot read or parse ${path}`);
+      }
+      try {
+        extraTechniques.push(...parseTechniques(raw, path));
+      } catch (e) {
+        die((e as Error).message);
+      }
+    }
+    if (!flags.quiet) {
+      process.stderr.write(`loaded ${extraTechniques.length} technique(s) from ${flags.load.join(", ")}\n`);
+    }
+  }
+
+  const included = flags.technique?.length ? expand(flags.technique, extraTechniques) : undefined;
+  const excluded = new Set(expand(flags.exclude, extraTechniques));
+  const allTechniqueIds = extraTechniques?.length
+    ? [...TECHNIQUES.map((t) => t.id), ...extraTechniques.map((t) => t.id)]
+    : TECHNIQUES.map((t) => t.id);
   let ids: string[] | undefined;
   if (included || excluded.size) {
-    ids = (included ?? TECHNIQUES.map((t) => t.id)).filter((id) => !excluded.has(id));
+    ids = (included ?? allTechniqueIds).filter((id) => !excluded.has(id));
     if (ids.length === 0) die("-t and -x cancelled out: the pool is empty");
   }
 
-  // Seeded from the OS when absent, and always echoed so any run can be replayed.
   const seed = flags.seed ?? randomBytes(4).toString("hex");
   const result = build({
     instruction,
@@ -245,6 +283,7 @@ function main(): void {
     mutators: parseMutators(flags.mutate),
     seed,
     limit: count,
+    extraTechniques,
   });
 
   if (!flags.quiet) {
@@ -272,14 +311,29 @@ function main(): void {
     if (bad) die(`${bad.techniqueId} contains a NUL byte; use --jsonl instead`, 1);
   }
 
+  if (flags.report) {
+    const fmt = flags.report.toLowerCase();
+    if (fmt !== "json" && fmt !== "md") die(`--report takes "json" or "md", got "${flags.report}"`);
+    const report = generateReport(result, instruction, new Date().toISOString());
+    const body = fmt === "json" ? reportToJson(report) : reportToMarkdown(report);
+    if (flags.output) {
+      try {
+        writeFileSync(flags.output, body);
+      } catch (e) {
+        die(`cannot write ${flags.output}: ${(e as Error).message}`);
+      }
+    } else {
+      process.stdout.write(body);
+    }
+    return;
+  }
+
   if (flags.output) {
     const pattern = flags.output;
     const perFile = pattern.includes("%n");
     result.payloads.forEach((p, i) => {
       const path = perFile ? pattern.replace("%n", String(i + 1)) : pattern;
       try {
-        // One file per payload gets the exact bytes and nothing else; a single
-        // file keeps the stream framing so it stays parseable.
         const body = perFile ? p.text : render(p, format, i, result.payloads.length);
         writeFileSync(path, body, { flag: !perFile && i > 0 ? "a" : "w" });
       } catch (e) {
@@ -289,8 +343,6 @@ function main(): void {
     return;
   }
 
-  // Written one record at a time so a streaming consumer sees payload #1 before
-  // #19 is computed, rather than everything arriving at exit.
   result.payloads.forEach((p, i) => {
     process.stdout.write(render(p, format, i, result.payloads.length));
   });

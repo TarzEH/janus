@@ -42,6 +42,17 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Coverage
+        if: matrix.node == 22
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        if: matrix.node == 22
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
       # One package that is both a library and a binary is exactly the shape
       # these tools exist to catch, and it breaks AFTER publish.

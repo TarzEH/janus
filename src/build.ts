@@ -26,6 +26,8 @@ export interface BuildOptions {
   readonly seed: string;
   readonly limit?: number;
   readonly maxOutputChars?: number;
+  /** Extra techniques loaded at runtime (--load). Appended after the catalog. */
+  readonly extraTechniques?: readonly Technique[];
 }
 
 export interface AppliedStep {
@@ -140,9 +142,11 @@ export function build(opts: BuildOptions): BuildResult {
   const skipped: { id: string; reason: string }[] = [];
   const payloads: Payload[] = [];
 
-  // Catalog order. Deterministic and explainable, which is what you want once
-  // there is no ranking left to justify any other sequence.
-  for (const t of activeTechniques()) {
+  const pool = opts.extraTechniques?.length
+    ? [...activeTechniques(), ...opts.extraTechniques.filter((t) => t.status !== "retired")]
+    : activeTechniques();
+
+  for (const t of pool) {
     if (wanted && !wanted.has(t.id)) continue;
     if (CATEGORY_META[t.category].referenceOnly) {
       skipped.push({
