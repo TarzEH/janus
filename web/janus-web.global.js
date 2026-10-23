@@ -16485,58 +16485,6 @@ ${flipped}`,
     return { text, verifiableText, locked, applied, notes };
   }
 
-  // src/guard.ts
-  var RULES = [
-    {
-      category: "cbrn-weapons",
-      label: "chemical, biological, radiological, nuclear or weapons synthesis",
-      pattern: /\b(synthesi[sz]e|manufactur\w*|produce|make|build)\b[^.]{0,60}\b(nerve agent|sarin|vx|tabun|ricin|anthrax|smallpox|weapons?[- ]grade|enriched uranium|plutonium|dirty bomb|pipe bomb|ied|explosive device)\b/i
-    },
-    {
-      category: "csam",
-      label: "sexual content involving minors",
-      pattern: /\b(child|minor|underage|preteen|toddler)\b[^.]{0,40}\b(sexual|porn\w*|nude|erotic|explicit)\b|\bcsam\b/i
-    },
-    {
-      category: "functional-malware",
-      label: "working malware, ransomware or exploit code",
-      pattern: /\b(write|generate|produce|give me|create)\b[^.]{0,50}\b(ransomware|keylogger|rootkit|botnet|worm|working exploit|weaponi[sz]ed exploit|0-?day|zero-?day exploit)\b[^.]{0,40}\b(code|payload|implant|source)\b/i
-    },
-    {
-      category: "credential-phishing",
-      label: "a credential-phishing kit targeting a named institution",
-      pattern: /\b(phishing|credential harvest\w*)\b[^.]{0,50}\b(page|kit|clone|landing|portal)\b[^.]{0,60}\b(bank|paypal|microsoft 365|office ?365|okta|gmail|chase|hsbc|barclays)\b/i
-    },
-    {
-      category: "targeted-harassment",
-      label: "harassment or doxxing of a named private individual",
-      pattern: /\b(dox|doxx\w*)\b|\b(home address|social security number|ssn|private phone)\b[^.]{0,40}\bof\b[^.]{0,30}\b(my ex|my neighbou?r|this person|her|him)\b/i
-    }
-  ];
-  function screenPayload(text) {
-    for (const rule of RULES) {
-      if (rule.pattern.test(text)) {
-        return { allowed: false, category: rule.category, label: rule.label };
-      }
-    }
-    return { allowed: true };
-  }
-  var RefusedPayloadError = class extends Error {
-    constructor(result) {
-      super(
-        `Refusing to build this payload: it reads as a request for ${result.label}.
-This is one of five published categories in SECURITY.md that JANUS will not help with.
-The check is a regex and it is bypassable \u2014 that is not a hint, it is a statement that
-the control here is thin and deliberate. If this is a false positive on legitimate test
-text, rephrase it; the tool is not trying to guess your intent.`
-      );
-      this.result = result;
-      this.name = "RefusedPayloadError";
-    }
-    result;
-  };
-  var REFUSAL_CATEGORIES = RULES.map((r) => ({ category: r.category, label: r.label }));
-
   // src/build.ts
   function criticalRanges(text, value) {
     const out = [];
@@ -16600,8 +16548,6 @@ ${turn.body}`
     if (!instruction) {
       throw new Error("empty input: supply the instruction you want the target to carry out");
     }
-    const screen = screenPayload(instruction);
-    if (!screen.allowed) throw new RefusedPayloadError(screen);
     const rootRng = createRng(opts.seed);
     const wanted = opts.techniqueIds?.length ? new Set(opts.techniqueIds) : void 0;
     const skipped = [];
@@ -16620,5 +16566,57 @@ ${turn.body}`
     }
     return { payloads, seed: opts.seed, skipped };
   }
+
+  // src/guard.ts
+  var RULES = [
+    {
+      category: "cbrn-weapons",
+      label: "chemical, biological, radiological, nuclear or weapons synthesis",
+      pattern: /\b(synthesi[sz]e|manufactur\w*|produce|make|build)\b[^.]{0,60}\b(nerve agent|sarin|vx|tabun|ricin|anthrax|smallpox|weapons?[- ]grade|enriched uranium|plutonium|dirty bomb|pipe bomb|ied|explosive device)\b/i
+    },
+    {
+      category: "csam",
+      label: "sexual content involving minors",
+      pattern: /\b(child|minor|underage|preteen|toddler)\b[^.]{0,40}\b(sexual|porn\w*|nude|erotic|explicit)\b|\bcsam\b/i
+    },
+    {
+      category: "functional-malware",
+      label: "working malware, ransomware or exploit code",
+      pattern: /\b(write|generate|produce|give me|create)\b[^.]{0,50}\b(ransomware|keylogger|rootkit|botnet|worm|working exploit|weaponi[sz]ed exploit|0-?day|zero-?day exploit)\b[^.]{0,40}\b(code|payload|implant|source)\b/i
+    },
+    {
+      category: "credential-phishing",
+      label: "a credential-phishing kit targeting a named institution",
+      pattern: /\b(phishing|credential harvest\w*)\b[^.]{0,50}\b(page|kit|clone|landing|portal)\b[^.]{0,60}\b(bank|paypal|microsoft 365|office ?365|okta|gmail|chase|hsbc|barclays)\b/i
+    },
+    {
+      category: "targeted-harassment",
+      label: "harassment or doxxing of a named private individual",
+      pattern: /\b(dox|doxx\w*)\b|\b(home address|social security number|ssn|private phone)\b[^.]{0,40}\bof\b[^.]{0,30}\b(my ex|my neighbou?r|this person|her|him)\b/i
+    }
+  ];
+  function screenPayload(text) {
+    for (const rule of RULES) {
+      if (rule.pattern.test(text)) {
+        return { allowed: false, category: rule.category, label: rule.label };
+      }
+    }
+    return { allowed: true };
+  }
+  var RefusedPayloadError = class extends Error {
+    constructor(result) {
+      super(
+        `Refusing to build this payload: it reads as a request for ${result.label}.
+This is one of five published categories in SECURITY.md that JANUS will not help with.
+The check is a regex and it is bypassable \u2014 that is not a hint, it is a statement that
+the control here is thin and deliberate. If this is a false positive on legitimate test
+text, rephrase it; the tool is not trying to guess your intent.`
+      );
+      this.result = result;
+      this.name = "RefusedPayloadError";
+    }
+    result;
+  };
+  var REFUSAL_CATEGORIES = RULES.map((r) => ({ category: r.category, label: r.label }));
   return __toCommonJS(src_exports);
 })();

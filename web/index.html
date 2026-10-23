@@ -469,6 +469,7 @@ textarea:focus {
     <div class="mutator-chips" id="mutator-chips"></div>
 
     <button class="generate-btn" id="generate-btn" onclick="generate()">Generate Payloads</button>
+    <button class="generate-btn" id="copy-all-btn" onclick="copyAll()" style="margin-top:0.5rem;background:var(--surface2);border:1px solid var(--border);display:none">Copy All (JSONL)</button>
   </div>
 
   <div class="content" id="content">
@@ -521,7 +522,7 @@ coverageEl.innerHTML = owaspItems.map(o => {
     <div class="owasp-id">${o.id}</div>
     <div class="owasp-name">${o.name}</div>
     <div class="coverage-bar"><div class="coverage-fill" style="width:${pct}%;background:${color}"></div></div>
-    <div class="count">${matching.length} technique${matching.length !== 1 ? 's' : ''}: ${matching.map(t => t.id).join(', ') || '1.0.0'}</div>
+    <div class="count">${matching.length} technique${matching.length !== 1 ? 's' : ''}${matching.length > 0 ? ': ' + matching.map(t => t.id).join(', ') : ''}</div>
   </div>`;
 }).join('');
 
@@ -597,6 +598,8 @@ function getSelectedMutators() {
   return active.length > 0 ? active : 'none';
 }
 
+let lastPayloads = [];
+
 function generate() {
   const instruction = document.getElementById('instruction').value.trim();
   if (!instruction) {
@@ -606,11 +609,15 @@ function generate() {
 
   const techniqueIds = getSelectedTechniques();
   if (techniqueIds.length === 0) {
-    alert('Select at least one technique.');
+    document.getElementById('results').innerHTML = `<div class="payload-card" style="border-color:var(--warning)">
+      <div class="payload-header"><span class="technique-name" style="color:var(--warning)">Select at least one technique</span></div>
+    </div>`;
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('results-title').style.display = 'block';
     return;
   }
 
-  const seed = document.getElementById('seed').value || '1.0.0';
+  const seed = document.getElementById('seed').value || Math.random().toString(36).slice(2, 10);
   const mutatorSelection = getSelectedMutators();
 
   let result;
@@ -632,6 +639,8 @@ function generate() {
 
   document.getElementById('empty').style.display = 'none';
   document.getElementById('results-title').style.display = 'block';
+  lastPayloads = result.payloads;
+  document.getElementById('copy-all-btn').style.display = 'block';
 
   const resultsEl = document.getElementById('results');
   resultsEl.innerHTML = result.payloads.map((p, i) => {
@@ -688,6 +697,18 @@ function copyPayload(i, btn) {
     sel.removeAllRanges();
     sel.addRange(range);
   }
+}
+
+function copyAll() {
+  if (!lastPayloads.length) return;
+  const jsonl = lastPayloads.map(p => JSON.stringify(p.text)).join('\n');
+  try {
+    navigator.clipboard.writeText(jsonl).then(() => {
+      const btn = document.getElementById('copy-all-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy All (JSONL)'; }, 1500);
+    });
+  } catch {}
 }
 
 function esc(s) {
