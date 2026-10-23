@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
+import { startRepl } from "./repl.js";
 import {
   build,
   CATEGORY_META,
@@ -40,6 +41,7 @@ OPTIONS
   -o, --output PATTERN  Write to files instead of stdout; %n is the payload index.
   -r, --report FORMAT   Export a structured report: json | md
       --load FILE       Load extra techniques from a JSON file.
+      --repl            Interactive mode. Set instruction, tweak, generate.
   -q, --quiet           Silence stderr. Never affects stdout.
   -l, --list            List techniques and mutators, then exit.
   -h, --help  -V, --version
@@ -88,6 +90,7 @@ interface Flags {
   output?: string;
   report?: string;
   load?: string[];
+  repl?: boolean;
   quiet?: boolean;
   list?: boolean;
   null?: boolean;
@@ -209,6 +212,7 @@ function main(): void {
         output: { type: "string", short: "o" },
         report: { type: "string", short: "r" },
         load: { type: "string", multiple: true },
+        repl: { type: "boolean" },
         quiet: { type: "boolean", short: "q" },
         list: { type: "boolean", short: "l" },
         null: { type: "boolean", short: "0" },
@@ -229,6 +233,7 @@ function main(): void {
   if (flags.version) return void process.stdout.write(`janus ${JANUS_VERSION}\n`);
   if (flags.help) return void process.stdout.write(HELP);
   if (flags.list) return cmdList();
+  if (flags.repl) return startRepl();
 
   if (process.stdin.isTTY && flags.input === undefined && files.length === 0) {
     return void process.stdout.write(HELP);

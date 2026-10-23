@@ -104,6 +104,7 @@ janus -i "..." --jsonl | jq -r .                  # round-trips to exact bytes
 janus -i "..." -o 'payload-%n.txt'                # one file each
 janus -i "..." --report json -o report.json       # structured assessment report
 janus -i "..." --report md -o report.md           # markdown report for deliverables
+janus --repl                                       # interactive mode
 ```
 
 stdout is payloads. Everything else — the seed, warnings, skipped techniques — is
@@ -195,7 +196,7 @@ Three things follow from the research and are baked in:
 | | **JANUS** | PyRIT | garak | promptfoo |
 |---|---|---|---|---|
 | **What it is** | Payload generator | Red-team orchestrator | LLM vulnerability scanner | Eval framework |
-| **One-liner CLI** | `echo "text" \| janus` | No CLI pipe | No CLI pipe | YAML config |
+| **One-liner CLI** | `echo "text" \| janus` + REPL | No CLI pipe | No CLI pipe | YAML config |
 | **Offline / zero network** | Yes | No (needs target) | No (needs target) | No (needs target) |
 | **Deterministic output** | Seed-reproducible | No | No | No |
 | **Obfuscation chains** | 16 mutators, 1–5 per technique | Converters (no chain) | Buffs (union, not chain) | Plugins |
