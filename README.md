@@ -4,9 +4,14 @@
 
 **Your text in. Injection payloads out.**
 
-[![CI](https://github.com/TarzEH/janus/actions/workflows/ci.yml/badge.svg?style=flat-square)](https://github.com/TarzEH/janus/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg?style=flat-square)](.nvmrc)
+[![CI](https://github.com/TarzEH/janus/actions/workflows/ci.yml/badge.svg)](https://github.com/TarzEH/janus/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/janus-cli?color=22d3ee)](https://www.npmjs.com/package/janus-cli)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](.nvmrc)
+![Techniques](https://img.shields.io/badge/techniques-30-8b5cf6)
+![Mutators](https://img.shields.io/badge/mutators-16-ec4899)
+
+[Install](#install) · [Usage](#usage) · [Playground](#playground) · [OWASP Coverage](#owasp-llm-top-10-coverage) · [How It Compares](#how-it-compares) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -99,6 +104,49 @@ stdout is payloads. Everything else — the seed, warnings, skipped techniques �
 stderr. Exit codes follow `grep`: **0** payloads · **1** nothing emitted ·
 **2** usage · **3** refused.
 
+## Playground
+
+Try JANUS in your browser — no install needed:
+
+**[janus playground →](https://tarzeh.github.io/janus/)**
+
+The playground runs the full engine client-side. Nothing leaves your browser.
+
+## Catalog: 30 Techniques in 8 Categories
+
+| Code | Category | Techniques | What it tests |
+|---|---|---|---|
+| **C1** | Instruction-Hierarchy Attacks | 6 | Making attacker text outrank the system prompt |
+| **C2** | Context & Persona Reframing | 2 | Changing what the model believes it is |
+| **C3** | Output-Conditioning Attacks | 3 | Making refusal structurally unreachable |
+| **C4** | Obfuscation & Encoding | 5 | Destroying surface recognizability while preserving semantics |
+| **C5** | Temporal & Statistical Attacks | 3 | Power from many turns, examples, or token volume |
+| **C6** | Token-Level & Optimization | 1 | Machine-found adversarial suffixes (reference only) |
+| **C7** | Reconnaissance & Disclosure | 3 | Learning about the target without forcing an action |
+| **C8** | Persistence & Propagation | 4 | Surviving beyond the current context window |
+
+Run `janus --list` for the full catalog with IDs.
+
+## OWASP LLM Top 10 Coverage
+
+Every technique is mapped to the [OWASP LLM Top 10 (2025)](https://owasp.org/www-project-top-10-for-large-language-model-applications/) and [MITRE ATLAS](https://atlas.mitre.org/).
+
+| OWASP Item | Techniques | Coverage |
+|---|---|---|
+| **LLM01** Prompt Injection | JNS-0001, 0002, 0004–0015, 0017, 0022, 0026, 0027 | Full |
+| **LLM02** Sensitive Information Disclosure | JNS-0003, 0016, 0026, 0028 | Full |
+| **LLM03** Supply Chain Vulnerabilities | — | Out of scope (no network) |
+| **LLM04** Data and Model Poisoning | JNS-0019, 0030 | Partial |
+| **LLM05** Improper Output Handling | JNS-0021 | Partial |
+| **LLM06** Excessive Agency | JNS-0016, 0017, 0018, 0022, 0023, 0029 | Full |
+| **LLM07** System Prompt Leakage | JNS-0003, 0014 | Full |
+| **LLM08** Vector and Embedding Weaknesses | JNS-0019, 0030 | Partial |
+| **LLM09** Misinformation | JNS-0025 | Partial |
+| **LLM10** Unbounded Consumption | JNS-0023, 0024, 0029 | Partial |
+
+LLM03 (supply chain) is deliberately out of scope — JANUS generates payloads, not
+dependency-confusion packages.
+
 ## What makes a payload "upgraded"
 
 Obfuscation is **on by default**. The set is chosen by measured guardrail-evasion
@@ -126,6 +174,24 @@ Three things follow from the research and are baked in:
   run, so obfuscation rearranges everything around it and leaves it intact. When
   a chain cannot preserve it, you get a warning on stderr.
 
+## How It Compares
+
+| | **JANUS** | PyRIT | garak | promptfoo |
+|---|---|---|---|---|
+| **What it is** | Payload generator | Red-team orchestrator | LLM vulnerability scanner | Eval framework |
+| **One-liner CLI** | `echo "text" \| janus` | No CLI pipe | No CLI pipe | YAML config |
+| **Offline / zero network** | Yes | No (needs target) | No (needs target) | No (needs target) |
+| **Deterministic output** | Seed-reproducible | No | No | No |
+| **Obfuscation chains** | 16 mutators, 2-deep default | Converters (no chain) | Buffs (union, not chain) | Plugins |
+| **OWASP LLM Top 10 mapped** | Yes (9/10) | Partial | Partial | Partial |
+| **MITRE ATLAS mapped** | Yes | No | Yes | No |
+| **Techniques** | 30 | N/A (converters) | 34 probes | Plugins |
+| **Browser playground** | Yes | No | No | No |
+| **Runs attacks** | Never | Yes | Yes | Yes |
+
+JANUS generates; the others consume. Use JANUS to build the payloads, then feed
+them to your runner of choice.
+
 ## What it will never do
 
 Run an attack · score a response · make a network request · write anything you did not ask for ·
@@ -139,10 +205,15 @@ free text, so nothing else could be true. See [SECURITY.md](SECURITY.md).
 
 ## Disclaimer
 
-Only use this against targets you **own** or have **explicit written permission**
-to test. Unauthorized testing is a crime in most jurisdictions, and this tool is
-not a defense.
+**This tool is for authorized security testing only.** Only use it against
+targets you **own** or have **explicit written permission** to test. Unauthorized
+testing is a crime in most jurisdictions and this tool is not a defense. The
+authors accept no liability for misuse.
+
+By using JANUS you agree that you are solely responsible for compliance with all
+applicable laws and regulations. If you do not have written authorization to test
+a target, do not use this tool against it.
 
 ---
 
-[MIT](LICENSE) © 2026 TarzEH · [SECURITY](SECURITY.md) · [CONTRIBUTING](CONTRIBUTING.md) · [ARCHITECTURE](docs/ARCHITECTURE.md)
+[MIT](LICENSE) © 2026 Ori Ashkenazi · [SECURITY](SECURITY.md) · [CONTRIBUTING](CONTRIBUTING.md) · [CODE OF CONDUCT](CODE_OF_CONDUCT.md) · [ARCHITECTURE](docs/ARCHITECTURE.md)

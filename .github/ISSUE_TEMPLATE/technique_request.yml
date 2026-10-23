@@ -1,0 +1,46 @@
+name: New technique
+description: Propose a prompt-injection technique for the catalog
+labels: [enhancement, catalog]
+body:
+  - type: textarea
+    id: technique
+    attributes:
+      label: Technique description
+      description: |
+        What injection vector does this exploit?
+        Include a reference (paper, blog, CVE) if one exists.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which axis-A category fits best?
+      options:
+        - C1 — Instruction-Hierarchy Attacks
+        - C2 — Context & Persona Reframing
+        - C3 — Output-Conditioning Attacks
+        - C4 — Obfuscation & Encoding
+        - C5 — Temporal & Statistical Attacks
+        - C6 — Token-Level & Optimization
+        - C7 — Reconnaissance & Disclosure Probes
+        - C8 — Persistence & Propagation
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: template
+    attributes:
+      label: Draft template
+      description: |
+        A rough payload template. Use `{{objective}}` for the instruction slot.
+      render: text
+
+  - type: textarea
+    id: owasp
+    attributes:
+      label: OWASP / ATLAS mapping
+      description: Which OWASP LLM Top 10 items or MITRE ATLAS techniques does this test?
+      placeholder: "LLM01 (Prompt Injection), AML.T0051.000 (Direct Prompt Injection)"

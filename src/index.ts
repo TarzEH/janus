@@ -7,6 +7,7 @@ export * from "./schema/technique.js";
 
 // Catalog
 export * from "./catalog/catalog.js";
+export * from "./catalog/mappings.js";
 
 // Engine
 export * from "./rng/rng.js";

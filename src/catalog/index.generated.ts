@@ -21,6 +21,16 @@ import { JNS_0017 } from "./techniques/JNS-0017-tool-result-injection.js";
 import { JNS_0018 } from "./techniques/JNS-0018-memory-write-induction.js";
 import { JNS_0019 } from "./techniques/JNS-0019-rag-corpus-seeding.js";
 import { JNS_0020 } from "./techniques/JNS-0020-gcg-adversarial-suffix.js";
+import { JNS_0021 } from "./techniques/JNS-0021-output-as-code-injection.js";
+import { JNS_0022 } from "./techniques/JNS-0022-tool-argument-manipulation.js";
+import { JNS_0023 } from "./techniques/JNS-0023-agent-loop-induction.js";
+import { JNS_0024 } from "./techniques/JNS-0024-context-window-stuffing.js";
+import { JNS_0025 } from "./techniques/JNS-0025-citation-fabrication.js";
+import { JNS_0026 } from "./techniques/JNS-0026-multimodal-text-in-image.js";
+import { JNS_0027 } from "./techniques/JNS-0027-chain-of-thought-hijack.js";
+import { JNS_0028 } from "./techniques/JNS-0028-pii-extraction-probe.js";
+import { JNS_0029 } from "./techniques/JNS-0029-recursive-self-instruction.js";
+import { JNS_0030 } from "./techniques/JNS-0030-embedding-collision-seed.js";
 
 export const RAW_TECHNIQUES: readonly TechniqueInput[] = [
   JNS_0001,
@@ -43,4 +53,14 @@ export const RAW_TECHNIQUES: readonly TechniqueInput[] = [
   JNS_0018,
   JNS_0019,
   JNS_0020,
+  JNS_0021,
+  JNS_0022,
+  JNS_0023,
+  JNS_0024,
+  JNS_0025,
+  JNS_0026,
+  JNS_0027,
+  JNS_0028,
+  JNS_0029,
+  JNS_0030,
 ];

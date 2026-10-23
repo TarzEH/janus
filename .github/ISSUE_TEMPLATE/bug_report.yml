@@ -1,0 +1,57 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug — expected vs actual behaviour.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Minimal command to trigger the issue.
+        ```bash
+        janus -i "..." -s fixed -t JNS-0001 --jsonl
+        ```
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: JANUS version
+      description: Output of `janus --version`
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation method
+      options:
+        - install.sh / install.ps1 (standalone binary)
+        - npm i -g janus-cli
+        - npx janus-cli
+        - From source (npm run build)
+    validations:
+      required: true
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Node version, shell
+      placeholder: macOS 15.4, Node 22.16, zsh
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Paste stderr and any error messages.
+      render: text

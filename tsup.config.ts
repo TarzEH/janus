@@ -29,4 +29,15 @@ export default defineConfig([
     noExternal: ["zod"],
     banner: { js: "#!/usr/bin/env node" },
   },
+  {
+    // Browser bundle for the web playground. IIFE so it attaches to window.Janus.
+    entry: { "janus-web": "src/index.ts" },
+    format: ["iife"],
+    globalName: "Janus",
+    clean: false,
+    sourcemap: false,
+    target: "es2022",
+    noExternal: ["zod"],
+    outDir: "web",
+  },
 ]);

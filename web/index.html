@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JANUS Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: #2a2a3a;
+  --fg: #e4e4ef;
+  --fg-dim: #8888a0;
+  --accent: #06b6d4;
+  --accent2: #8b5cf6;
+  --accent3: #ec4899;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(180deg, var(--surface), var(--bg));
+}
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+.header .version {
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  color: var(--accent2);
+  background: rgba(139,92,246,0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(139,92,246,0.2);
+}
+.header .tagline {
+  color: var(--fg-dim);
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+/* Layout */
+.main {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  min-height: calc(100vh - 60px);
+}
+
+/* Sidebar */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 1.25rem;
+  overflow-y: auto;
+  background: var(--surface);
+}
+.sidebar h2 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-dim);
+  margin-bottom: 0.75rem;
+}
+
+/* Input area */
+.input-group { margin-bottom: 1.25rem; }
+.input-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--fg-dim);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Technique list */
+.category-group { margin-bottom: 1rem; }
+.category-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent2);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.category-label .code {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  background: rgba(139,92,246,0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+.technique-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.8rem;
+}
+.technique-item:hover { background: var(--surface2); }
+.technique-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+}
+.technique-item .id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--fg-dim);
+  min-width: 60px;
+}
+.technique-item .name { flex: 1; }
+.technique-item .tags {
+  display: flex;
+  gap: 0.2rem;
+}
+.tag {
+  font-size: 0.55rem;
+  font-family: var(--mono);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.tag-owasp { background: rgba(6,182,212,0.15); color: var(--accent); }
+.tag-atlas { background: rgba(236,72,153,0.15); color: var(--accent3); }
+
+.select-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.select-btns button {
+  flex: 1;
+  padding: 0.3rem;
+  font-size: 0.7rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.select-btns button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Mutator selector */
+.mutator-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+.mutator-chip {
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.mutator-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(6,182,212,0.1);
+}
+.mutator-chip:hover { border-color: var(--accent2); }
+
+/* Generate button */
+.generate-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+.generate-btn:hover { opacity: 0.9; }
+.generate-btn:active { transform: scale(0.98); }
+.generate-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Content area */
+.content {
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+.content h2 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--fg-dim);
+}
+
+/* Stats bar */
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+.stat .label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-dim);
+}
+.stat .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+.stat .value.cyan { color: var(--accent); }
+.stat .value.purple { color: var(--accent2); }
+.stat .value.pink { color: var(--accent3); }
+
+/* OWASP coverage */
+.coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.coverage-card {
+  padding: 0.75rem;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.coverage-card .owasp-id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.coverage-card .owasp-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 0.25rem 0;
+}
+.coverage-card .coverage-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+.coverage-card .coverage-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.coverage-card .count {
+  font-size: 0.65rem;
+  color: var(--fg-dim);
+  margin-top: 0.25rem;
+}
+
+/* Payload cards */
+.payload-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.payload-card:hover { border-color: var(--accent2); }
+.payload-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  gap: 0.75rem;
+}
+.payload-header .technique-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.payload-header .technique-id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--fg-dim);
+}
+.payload-header .mappings {
+  margin-left: auto;
+  display: flex;
+  gap: 0.3rem;
+}
+.payload-header .chain {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent2);
+}
+.payload-body {
+  padding: 1rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+  color: #c8c8dc;
+}
+.payload-footer {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border);
+  gap: 0.5rem;
+}
+.payload-footer .size {
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--fg-dim);
+}
+.copy-btn {
+  margin-left: auto;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+.copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.copy-btn.copied {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+/* Warning badge */
+.warning-badge {
+  font-size: 0.65rem;
+  color: var(--warning);
+  background: rgba(245,158,11,0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--fg-dim);
+}
+.empty-state .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+.empty-state p { max-width: 400px; margin: 0 auto; font-size: 0.9rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
+  .header { padding: 1rem; flex-wrap: wrap; }
+  .header .tagline { margin-left: 0; font-size: 0.75rem; }
+  .content { padding: 1rem; }
+  .coverage-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>JANUS</h1>
+  <span class="version" id="version"></span>
+  <span class="tagline">Prompt-injection payload generator — offline, deterministic, zero network</span>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="input-group">
+      <label>Instruction</label>
+      <textarea id="instruction" placeholder="Enter the instruction you want the target model to carry out..." rows="3"></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>Seed</label>
+      <input type="text" id="seed" value="playground" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:0.8rem;padding:0.5rem 0.75rem;">
+    </div>
+
+    <h2>Techniques</h2>
+    <div class="select-btns">
+      <button onclick="selectAll()">All</button>
+      <button onclick="selectNone()">None</button>
+      <button onclick="selectRecommended()">Recommended</button>
+    </div>
+    <div id="technique-list"></div>
+
+    <h2 style="margin-top:1rem">Mutators</h2>
+    <div class="select-btns" style="margin-bottom:0.5rem">
+      <button onclick="setMutators('recommended')">Recommended</button>
+      <button onclick="setMutators('none')">None</button>
+    </div>
+    <div class="mutator-chips" id="mutator-chips"></div>
+
+    <button class="generate-btn" id="generate-btn" onclick="generate()">Generate Payloads</button>
+  </div>
+
+  <div class="content" id="content">
+    <div class="stats" id="stats"></div>
+    <h2>OWASP LLM Top 10 Coverage</h2>
+    <div class="coverage-grid" id="coverage"></div>
+    <h2 id="results-title" style="display:none">Generated Payloads</h2>
+    <div id="results"></div>
+    <div class="empty-state" id="empty">
+      <div class="icon">&#9889;</div>
+      <p>Enter an instruction and click <strong>Generate</strong> to create prompt-injection payloads across all selected techniques.</p>
+    </div>
+  </div>
+</div>
+
+<script src="janus-web.global.js"></script>
+<script>
+const J = Janus;
+
+// Populate version
+document.getElementById('version').textContent = 'v' + J.VERSION;
+
+// Populate stats
+const techniques = J.TECHNIQUES;
+const categories = J.CATEGORY_META;
+const mappings = J.TECHNIQUE_MAPPINGS || {};
+const owaspItems = J.OWASP_LLM_TOP_10 || [];
+const mutators = J.MUTATORS;
+
+document.getElementById('stats').innerHTML = `
+  <div class="stat"><span class="label">Techniques</span><span class="value cyan">${techniques.length}</span></div>
+  <div class="stat"><span class="label">Categories</span><span class="value purple">${Object.keys(categories).length}</span></div>
+  <div class="stat"><span class="label">Mutators</span><span class="value pink">${mutators.length}</span></div>
+  <div class="stat"><span class="label">OWASP Coverage</span><span class="value cyan">${owaspItems.filter(o => {
+    return techniques.some(t => (mappings[t.id]?.owasp || []).includes(o.id));
+  }).length}/${owaspItems.length}</span></div>
+`;
+
+// OWASP coverage grid
+const coverageEl = document.getElementById('coverage');
+const maxTechniquesPerOwasp = Math.max(...owaspItems.map(o =>
+  techniques.filter(t => (mappings[t.id]?.owasp || []).includes(o.id)).length
+), 1);
+
+coverageEl.innerHTML = owaspItems.map(o => {
+  const matching = techniques.filter(t => (mappings[t.id]?.owasp || []).includes(o.id));
+  const pct = matching.length / maxTechniquesPerOwasp * 100;
+  const color = matching.length === 0 ? 'var(--danger)' : matching.length <= 2 ? 'var(--warning)' : 'var(--success)';
+  return `<div class="coverage-card">
+    <div class="owasp-id">${o.id}</div>
+    <div class="owasp-name">${o.name}</div>
+    <div class="coverage-bar"><div class="coverage-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="count">${matching.length} technique${matching.length !== 1 ? 's' : ''}: ${matching.map(t => t.id).join(', ') || 'none'}</div>
+  </div>`;
+}).join('');
+
+// Populate technique list grouped by category
+const listEl = document.getElementById('technique-list');
+const grouped = {};
+for (const t of techniques) {
+  if (!grouped[t.category]) grouped[t.category] = [];
+  grouped[t.category].push(t);
+}
+
+let html = '';
+for (const [cat, meta] of Object.entries(categories)) {
+  const items = grouped[cat] || [];
+  if (items.length === 0) continue;
+  html += `<div class="category-group">
+    <div class="category-label"><span class="code">${meta.code}</span>${meta.label}</div>`;
+  for (const t of items) {
+    const m = mappings[t.id] || { owasp: [], atlas: [] };
+    const tags = [
+      ...m.owasp.map(o => `<span class="tag tag-owasp">${o}</span>`),
+      ...m.atlas.slice(0, 1).map(a => `<span class="tag tag-atlas">${a.split('.').pop()}</span>`),
+    ].join('');
+    html += `<label class="technique-item">
+      <input type="checkbox" value="${t.id}" checked>
+      <span class="id">${t.id}</span>
+      <span class="name">${t.name}</span>
+      <span class="tags">${tags}</span>
+    </label>`;
+  }
+  html += '</div>';
+}
+listEl.innerHTML = html;
+
+// Populate mutator chips
+const chipsEl = document.getElementById('mutator-chips');
+let mutatorMode = 'recommended';
+chipsEl.innerHTML = mutators.map(m =>
+  `<span class="mutator-chip" data-id="${m.id}" onclick="toggleMutator(this)">${m.id}</span>`
+).join('');
+
+function selectAll() {
+  document.querySelectorAll('#technique-list input').forEach(cb => cb.checked = true);
+}
+function selectNone() {
+  document.querySelectorAll('#technique-list input').forEach(cb => cb.checked = false);
+}
+function selectRecommended() {
+  const recommended = new Set(['JNS-0001','JNS-0002','JNS-0004','JNS-0005','JNS-0008','JNS-0014','JNS-0017','JNS-0021','JNS-0027']);
+  document.querySelectorAll('#technique-list input').forEach(cb => {
+    cb.checked = recommended.has(cb.value);
+  });
+}
+
+function setMutators(mode) {
+  mutatorMode = mode;
+  document.querySelectorAll('.mutator-chip').forEach(el => el.classList.remove('active'));
+  if (mode === 'none') return;
+}
+function toggleMutator(el) {
+  el.classList.toggle('active');
+  mutatorMode = 'custom';
+}
+
+function getSelectedTechniques() {
+  return [...document.querySelectorAll('#technique-list input:checked')].map(cb => cb.value);
+}
+
+function getSelectedMutators() {
+  if (mutatorMode === 'none') return 'none';
+  if (mutatorMode === 'recommended') return 'recommended';
+  const active = [...document.querySelectorAll('.mutator-chip.active')].map(el => el.dataset.id);
+  return active.length > 0 ? active : 'none';
+}
+
+function generate() {
+  const instruction = document.getElementById('instruction').value.trim();
+  if (!instruction) {
+    document.getElementById('instruction').focus();
+    return;
+  }
+
+  const techniqueIds = getSelectedTechniques();
+  if (techniqueIds.length === 0) {
+    alert('Select at least one technique.');
+    return;
+  }
+
+  const seed = document.getElementById('seed').value || 'playground';
+  const mutatorSelection = getSelectedMutators();
+
+  let result;
+  try {
+    result = J.build({
+      instruction,
+      techniqueIds,
+      mutators: mutatorSelection,
+      seed,
+    });
+  } catch (e) {
+    document.getElementById('results').innerHTML = `<div class="payload-card" style="border-color:var(--danger)">
+      <div class="payload-header"><span class="technique-name" style="color:var(--danger)">${e.message}</span></div>
+    </div>`;
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('results-title').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('results-title').style.display = 'block';
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = result.payloads.map((p, i) => {
+    const t = techniques.find(t => t.id === p.techniqueId);
+    const m = mappings[p.techniqueId] || { owasp: [], atlas: [] };
+    const tags = [
+      ...m.owasp.map(o => `<span class="tag tag-owasp">${o}</span>`),
+      ...m.atlas.map(a => `<span class="tag tag-atlas">${a}</span>`),
+    ].join('');
+    const chain = p.chain.length > 0
+      ? `<span class="chain">${p.chain.map(s => s.id).join(' → ')}</span>`
+      : '';
+    const warnings = p.warnings.map(w => `<span class="warning-badge">${esc(w)}</span>`).join(' ');
+    const size = new Blob([p.text]).size;
+    return `<div class="payload-card">
+      <div class="payload-header">
+        <span class="technique-id">${p.techniqueId}</span>
+        <span class="technique-name">${t ? t.name : p.techniqueId}</span>
+        <span class="mappings">${tags}</span>
+        ${chain}
+      </div>
+      <div class="payload-body" id="payload-${i}">${esc(p.text)}</div>
+      <div class="payload-footer">
+        <span class="size">${size.toLocaleString()} bytes</span>
+        ${warnings}
+        <button class="copy-btn" onclick="copyPayload(${i}, this)">Copy</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (result.skipped.length > 0) {
+    resultsEl.innerHTML += result.skipped.map(s =>
+      `<div class="payload-card" style="opacity:0.5"><div class="payload-header">
+        <span class="technique-id">${s.id}</span>
+        <span class="technique-name" style="color:var(--fg-dim)">Skipped: ${esc(s.reason)}</span>
+      </div></div>`
+    ).join('');
+  }
+}
+
+function copyPayload(i, btn) {
+  const el = document.getElementById('payload-' + i);
+  const text = el.textContent;
+  try {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    generate();
+  }
+});
+</script>
+</body>
+</html>

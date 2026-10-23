@@ -1,6 +1,6 @@
 {
   "name": "janus-cli",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Wrap your instruction in documented prompt-injection techniques. Offline, deterministic, zero network.",
   "license": "MIT",
   "type": "module",

@@ -18,10 +18,12 @@ publish one, try `/.well-known/security.txt` first, then `security@` their domai
 An entry must be a template that wraps an arbitrary instruction and produces a
 payload. That is the whole bar, because that is the whole tool.
 
-The catalog no longer carries mitigation text, standards mappings or citations —
-they were read by a renderer that no longer exists. Put the provenance for a
-technique in the PR description, not in the struct the generator reads on every
-run. Enforced by `test/catalog.test.ts`, not by review discipline.
+Technique structs carry no mitigation text, citations, or standards references —
+those belong outside the engine (see the [governing rule](AGENTS.md)). OWASP LLM
+Top 10 and MITRE ATLAS mappings live in `src/catalog/mappings.ts`, separate from
+the payload generator. Put the provenance for a technique in the PR description,
+not in the struct the generator reads on every run. Enforced by
+`test/catalog.test.ts`, not by review discipline.
 
 ## What we will not merge
 
