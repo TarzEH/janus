@@ -17,7 +17,7 @@
 
 ---
 
-<img src="assets/demo.gif" alt="janus turning one instruction into an obfuscated payload" width="100%">
+<img src="assets/demo.svg" alt="janus turning one instruction into an obfuscated payload" width="100%">
 
 One instruction in, one payload per documented technique out, obfuscated by
 default. That is the whole tool.
@@ -111,6 +111,15 @@ Try JANUS in your browser — no install needed:
 **[janus playground →](https://tarzeh.github.io/janus/)**
 
 The playground runs the full engine client-side. Nothing leaves your browser.
+
+<details>
+<summary>Screenshots</summary>
+
+<img src="assets/playground-overview.jpg" alt="JANUS Playground — OWASP coverage grid, technique selector, stats" width="100%">
+
+<img src="assets/playground-payloads.jpg" alt="JANUS Playground — generated payloads with mutator chains and OWASP tags" width="100%">
+
+</details>
 
 ## Catalog: 30 Techniques in 8 Categories
 

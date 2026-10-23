@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TechniqueSchema, type Technique } from "../schema/technique.js";
 import { RAW_TECHNIQUES } from "./index.generated.js";
 
-export const CATALOG_VERSION = "0.3.0";
+export const CATALOG_VERSION = "1.0.0";
 
 function parseAll(): readonly Technique[] {
   const parsed: Technique[] = [];

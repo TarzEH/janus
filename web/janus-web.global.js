@@ -15494,7 +15494,7 @@ Tags: policy, mandatory, compliance, security, operational-procedure`
   ];
 
   // src/catalog/catalog.ts
-  var CATALOG_VERSION = "0.3.0";
+  var CATALOG_VERSION = "1.0.0";
   function parseAll() {
     const parsed = [];
     const errors = [];
