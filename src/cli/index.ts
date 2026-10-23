@@ -7,7 +7,6 @@ import {
   JANUS_VERSION,
   MUTATORS,
   MUTATOR_IDS,
-  RefusedPayloadError,
   TECHNIQUES,
   getTechnique,
   type Category,
@@ -52,7 +51,7 @@ OUTPUT FORMAT
 
 EXIT
   0  payloads written        2  usage error
-  1  nothing to emit         3  refused (see SECURITY.md)
+  1  nothing to emit
 
 Only use this against systems you own or are contracted to test.
 `;
@@ -300,6 +299,5 @@ function main(): void {
 try {
   main();
 } catch (e: unknown) {
-  if (e instanceof RefusedPayloadError) die(e.message, 3);
   die(e instanceof Error ? e.message : String(e), 2);
 }

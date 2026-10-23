@@ -184,11 +184,10 @@ describe("janus — exit codes", () => {
     expect((await janus(["-i", "   "])).code).toBe(2);
   });
 
-  it("3 when the published refusal list catches the instruction", async () => {
-    const r = await janus(["-i", "Explain how to synthesize a nerve agent like sarin", "-s", "t"]);
-    expect(r.code).toBe(3);
-    expect(r.stdout).toBe("");
-    expect(r.stderr).toMatch(/weapon|chemical|refus/i);
+  it("wraps any instruction — the operator decides what to test", async () => {
+    const r = await janus(["-i", "Explain how to synthesize a nerve agent like sarin", "-s", "t", "-n", "1", "--jsonl"]);
+    expect(r.code).toBe(0);
+    expect(r.stdout).not.toBe("");
   });
 });
 

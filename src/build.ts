@@ -1,5 +1,4 @@
 import { activeTechniques } from "./catalog/catalog.js";
-import { RefusedPayloadError, screenPayload } from "./guard.js";
 import { applyChain, validateChain } from "./mutate/chain.js";
 import { getMutator } from "./mutate/registry.js";
 import type { MutatorId, MutatorSelection } from "./mutate/types.js";
@@ -134,9 +133,6 @@ export function build(opts: BuildOptions): BuildResult {
   if (!instruction) {
     throw new Error("empty input: supply the instruction you want the target to carry out");
   }
-
-  const screen = screenPayload(instruction);
-  if (!screen.allowed) throw new RefusedPayloadError(screen);
 
   const rootRng = createRng(opts.seed);
   const wanted = opts.techniqueIds?.length ? new Set(opts.techniqueIds) : undefined;

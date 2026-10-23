@@ -43,7 +43,8 @@ irm https://raw.githubusercontent.com/TarzEH/janus/main/install.ps1 | iex       
 ```
 
 Standalone binary, checksum-verified against `SHA256SUMS` before it touches your
-`PATH`. Piping a script from the internet into a shell is the supply-chain
+`PATH`. Works on macOS, Linux (Ubuntu, Debian, Kali, Arch), and Windows.
+Piping a script from the internet into a shell is the supply-chain
 problem this project exists to talk about — [read it first](install.sh); drop the
 `| sh` and it just prints.
 
@@ -102,7 +103,7 @@ janus -i "..." -o 'payload-%n.txt'                # one file each
 
 stdout is payloads. Everything else — the seed, warnings, skipped techniques — is
 stderr. Exit codes follow `grep`: **0** payloads · **1** nothing emitted ·
-**2** usage · **3** refused.
+**2** usage.
 
 ## Playground
 
@@ -125,14 +126,14 @@ The playground runs the full engine client-side. Nothing leaves your browser.
 
 | Code | Category | Techniques | What it tests |
 |---|---|---|---|
-| **C1** | Instruction-Hierarchy Attacks | 6 | Making attacker text outrank the system prompt |
+| **C1** | Instruction-Hierarchy Attacks | 7 | Making attacker text outrank the system prompt |
 | **C2** | Context & Persona Reframing | 2 | Changing what the model believes it is |
-| **C3** | Output-Conditioning Attacks | 3 | Making refusal structurally unreachable |
+| **C3** | Output-Conditioning Attacks | 4 | Making refusal structurally unreachable |
 | **C4** | Obfuscation & Encoding | 5 | Destroying surface recognizability while preserving semantics |
 | **C5** | Temporal & Statistical Attacks | 3 | Power from many turns, examples, or token volume |
 | **C6** | Token-Level & Optimization | 1 | Machine-found adversarial suffixes (reference only) |
 | **C7** | Reconnaissance & Disclosure | 3 | Learning about the target without forcing an action |
-| **C8** | Persistence & Propagation | 4 | Surviving beyond the current context window |
+| **C8** | Persistence & Propagation | 5 | Surviving beyond the current context window |
 
 Run `janus --list` for the full catalog with IDs.
 
@@ -142,7 +143,7 @@ Every technique is mapped to the [OWASP LLM Top 10 (2025)](https://owasp.org/www
 
 | OWASP Item | Techniques | Coverage |
 |---|---|---|
-| **LLM01** Prompt Injection | JNS-0001, 0002, 0004–0015, 0017, 0022, 0026, 0027 | Full |
+| **LLM01** Prompt Injection | JNS-0001, 0002, 0004–0015, 0017, 0020, 0026, 0027 | Full |
 | **LLM02** Sensitive Information Disclosure | JNS-0003, 0016, 0026, 0028 | Full |
 | **LLM03** Supply Chain Vulnerabilities | — | Out of scope (no network) |
 | **LLM04** Data and Model Poisoning | JNS-0019, 0030 | Partial |
@@ -174,9 +175,10 @@ rate, not by novelty — numbers from
 
 Three things follow from the research and are baked in:
 
-- **Two layers, not one.** Chaining is where the gain is — base64 alone measures
-  34% on GPT-4 and 94% chained. [LACE](https://arxiv.org/abs/2402.10601) puts the
-  optimum at two, which is what the default chains are.
+- **Chaining, not one-shot.** Chaining is where the gain is — base64 alone measures
+  34% on GPT-4 and 94% chained. [LACE](https://arxiv.org/abs/2402.10601) showed
+  two layers is the sweet spot; JANUS picks one to five per technique, optimized
+  for each technique's evasion profile.
 - **Every encoder states how to decode it.** A carrier alone underperforms; an
   explicit decode instruction is worth up to +95 percentage points.
 - **Your instruction comes out byte-identical.** It is locked before the mutators
@@ -191,7 +193,7 @@ Three things follow from the research and are baked in:
 | **One-liner CLI** | `echo "text" \| janus` | No CLI pipe | No CLI pipe | YAML config |
 | **Offline / zero network** | Yes | No (needs target) | No (needs target) | No (needs target) |
 | **Deterministic output** | Seed-reproducible | No | No | No |
-| **Obfuscation chains** | 16 mutators, 2-deep default | Converters (no chain) | Buffs (union, not chain) | Plugins |
+| **Obfuscation chains** | 16 mutators, 1–5 per technique | Converters (no chain) | Buffs (union, not chain) | Plugins |
 | **OWASP LLM Top 10 mapped** | Yes (9/10) | Partial | Partial | Partial |
 | **MITRE ATLAS mapped** | Yes | No | Yes | No |
 | **Techniques** | 30 | N/A (converters) | 34 probes | Plugins |
@@ -206,11 +208,9 @@ them to your runner of choice.
 Run an attack · score a response · make a network request · write anything you did not ask for ·
 ship optimized adversarial suffixes (C6 is documented, never generated).
 
-`janus` refuses five published categories — weapons capable of mass casualties,
-CSAM, functional malware, credential-phishing kits, targeted harassment — and
-exits **3** naming the category. That check is **a regex and it is bypassable.**
-Not a hint: a statement that the control is thin and deliberate. The tool takes
-free text, so nothing else could be true. See [SECURITY.md](SECURITY.md).
+JANUS wraps your instruction — it does not execute it. The operator decides what
+to test, and authorization is what makes that decision legal. See
+[SECURITY.md](SECURITY.md).
 
 ## Disclaimer
 

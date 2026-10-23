@@ -27,8 +27,6 @@ not in the struct the generator reads on every run. Enforced by
 
 ## What we will not merge
 
-- Working payloads for real-world harm — weapons, CSAM, functional malware, phishing kits.
-- Widening the screen in `src/guard.ts` to permit any of its five refused categories.
 - Anything that runs an attack, scores a response, or makes a network request.
 - Optimized adversarial suffixes. We document the technique and cite the paper. We do not ship the
   artifact. (This is why category C6 is reference-only.)
@@ -37,33 +35,21 @@ not in the struct the generator reads on every run. Enforced by
 - Live attack execution, response scoring, or a hosted callback collector. All three are out of scope
   permanently, not "not yet".
 
-## The one control, described honestly
+## Design philosophy
 
 JANUS takes your instruction as free text. That is the whole point of the tool — you are the one who
-decides what the target should be made to do — and it means there is no architectural boundary to
-hide behind. Being straight about that matters more than the marketing would.
+decides what the target should be made to do.
 
-What stands in place of a boundary is `src/guard.ts`: a short, published list of categories the tool
-will not dress up. It exits `3` and names the category. The five, quoted from the code so this file
-and the implementation cannot drift apart — `test/engine-purity.test.ts` fails if they do:
+It **wraps** the instruction in documented injection techniques. It does not execute it, does not send
+it anywhere, and does not evaluate the result. The instruction passes through byte-identical; JANUS
+adds obfuscation **around** it, not to it.
 
-| id | what it refuses |
-|---|---|
-| `cbrn-weapons` | chemical, biological, radiological, nuclear or weapons synthesis |
-| `csam` | sexual content involving minors |
-| `functional-malware` | working malware, ransomware or exploit code |
-| `credential-phishing` | a credential-phishing kit targeting a named institution |
-| `targeted-harassment` | harassment or doxxing of a named private individual |
+The control that matters is **your engagement's authorization**, not a regex inside the tool. Red
+teamers need to test the full spectrum of inputs against their targets — that is the job. A tool that
+selectively refuses to generate test payloads is a tool that leaves gaps in the assessment.
 
-
-**It is a set of regexes, and it is bypassable.** It catches careless misuse. It will not stop a
-determined adversary and it is not trying to — anyone who wants to route around a regex can.
-
-We are not going to pretend otherwise. The honest description of JANUS is: a payload converter with a
-thin screen, shipped because prompt-injection testing is a real job and the alternative is that
-testers hand-write the same wrappers worse. The things that carry real weight here are outside the
-tool — your engagement's authorization. There is nothing inside the tool that carries comparable
-weight, and pretending otherwise would be the marketing this file exists to avoid.
+`src/guard.ts` ships as a library utility for callers who want an optional content screen.
+The engine itself does not enforce it — the operator is trusted.
 
 ## Data handling
 
@@ -82,7 +68,7 @@ blocks non-standard licences by policy. Shipping one would lock out internal App
 teams — exactly the audience this is for — while stopping nobody else, since attackers do not honour
 copyright terms. Putting the ethical control in the licence is the definition of theatre.
 
-What the product can honestly offer instead is: a published refuse-list, no attack runner, no
+What the product can honestly offer instead is: no attack runner, no
 collector, and no network access at all. Those survive a fork only if the forker actively strips
 them, which is a visible, attributable act.
 

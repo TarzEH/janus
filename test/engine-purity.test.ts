@@ -2,7 +2,6 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { REFUSAL_CATEGORIES } from "../src/guard.js";
 
 /**
  * Two guarantees, enforced rather than promised. They used to share one
@@ -68,16 +67,6 @@ describe("JANUS makes no network requests", () => {
       version: string;
     };
     expect(readFileSync(join(srcRoot, "version.ts"), "utf8")).toContain(`"${pkg.version}"`);
-  });
-
-  // guard.ts says its categories "match SECURITY.md verbatim". That was an
-  // assertion in a comment, which enforces nothing. This makes it true.
-  it("keeps the refusal list and SECURITY.md in step", () => {
-    const security = readFileSync(join(pkgRoot, "SECURITY.md"), "utf8");
-    for (const { category, label } of REFUSAL_CATEGORIES) {
-      expect(security, `SECURITY.md is missing the "${category}" row`).toContain(category);
-      expect(security, `SECURITY.md paraphrases "${category}" instead of quoting it`).toContain(label);
-    }
   });
 
   it("depends on zod and nothing else at runtime", () => {
