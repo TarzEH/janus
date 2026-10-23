@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   // .tsbuild is the typecheck-only output of `tsc -b`; dist is tsup's. Neither
   // is source, and linting generated .d.ts files reports nothing actionable.
-  { ignores: ["**/dist/**", "**/.tsbuild/**", "**/binaries/**", "**/node_modules/**", "**/*.mjs"] },
+  { ignores: ["**/dist/**", "**/.tsbuild/**", "**/binaries/**", "**/node_modules/**", "**/web/**", "**/*.mjs"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
