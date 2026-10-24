@@ -44,11 +44,11 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^4.1.12",
-    "eslint": "^10.8.0",
-    "tsup": "^8.5.1",
+    "eslint": "^10.13.0",
+    "tsup": "^9.0.0",
     "typescript": "^5.9.0",
-    "typescript-eslint": "^8.65.0",
-    "vitest": "^4.1.10"
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
   },
   "keywords": [
     "prompt-injection",
